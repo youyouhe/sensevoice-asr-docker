@@ -14,9 +14,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     ffmpeg \
     libsndfile1-dev \
-    python3.12 \
-    python3.12-dev \
-    python3.12-venv \
+    python3.8 \
+    python3.8-dev \
+    python3.8-venv \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装Miniconda
@@ -26,9 +27,9 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
     /opt/conda/bin/conda clean -ya
 
 # 创建虚拟环境并安装PyTorch
-RUN /opt/conda/bin/conda create -n asr_env python=3.12 -y && \
+RUN /opt/conda/bin/conda create -n asr_env python=3.8 -y && \
     /opt/conda/bin/conda activate asr_env && \
-    conda install pytorch==2.3.1 torchaudio==2.3.1 pytorch-cuda=12.1 -c pytorch -c nvidia -y
+    conda install pytorch==2.3.1 torchaudio==2.3.1 pytorch-cuda=12.9 -c pytorch -c nvidia -y
 
 # 设置工作目录
 WORKDIR /app
