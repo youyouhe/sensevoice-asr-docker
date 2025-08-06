@@ -23,6 +23,8 @@ services:
       - model_cache:/root/.cache/modelscope/hub
       # 临时文件目录
       - tmp_data:/app/tmp
+      # 源代码目录挂载（开发模式）
+      - ./src:/app/src
       # 可选：挂载本地音频文件目录
       # - ./audio:/app/audio
     deploy:
