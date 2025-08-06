@@ -81,20 +81,12 @@ cleanup() {
 build_image() {
     print_info "开始构建Docker镜像..."
     
-    # 使用优化的requirements文件
-    cp requirements.docker.txt requirements.txt
-    
     # 构建镜像
     if docker-compose build --no-cache; then
         print_success "Docker镜像构建成功"
     else
         print_error "Docker镜像构建失败"
         exit 1
-    fi
-    
-    # 恢复原始requirements文件
-    if [ -f requirements.txt.backup ]; then
-        mv requirements.txt.backup requirements.txt
     fi
 }
 
