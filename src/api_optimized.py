@@ -8,7 +8,7 @@ from typing_extensions import Annotated
 from typing import List
 from enum import Enum
 import torchaudio
-from model import SenseVoiceSmall
+# from model import SenseVoiceSmall  # 延后导入，避免重复加载模型
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 from io import BytesIO
 from pathlib import Path
@@ -76,9 +76,19 @@ def load_models():
     print("All models loaded successfully!")
     return model, vm
 
-# Load models at startup
-print("Loading models...")
-model, vm = load_models()
+# 全局变量，存储已加载的模型
+_loaded_models = None
+
+def get_models():
+    """获取已加载的模型，如果未加载则先加载"""
+    global _loaded_models
+    if _loaded_models is None:
+        print("Loading models...")
+        _loaded_models = load_models()
+    return _loaded_models
+
+# 加载模型（在启动时）
+model, vm = get_models()
 
 '''
 格式化毫秒或秒为符合srt格式的 2位小时:2位分:2位秒,3位毫秒 形式
