@@ -6,11 +6,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV TZ=Asia/Shanghai
 
-# 安装系统依赖，预先配置时区
+# 安装系统依赖，包括tzdata并配置时区
 RUN apt-get update && \
-    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    dpkg-reconfigure --frontend noninteractive tzdata && \
     apt-get install -y \
+    tzdata \
     build-essential \
     git \
     wget \
@@ -21,8 +20,10 @@ RUN apt-get update && \
     python3.8-dev \
     python3.8-venv \
     python3-pip \
-    software-properties-common \
-    && rm -rf /var/lib/apt/lists/*
+    software-properties-common && \
+    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
 # 创建Python虚拟环境
 RUN python3.8 -m venv /opt/venv
@@ -58,19 +59,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV TZ=Asia/Shanghai
 
-# 安装运行时依赖，预先配置时区
+# 安装运行时依赖，包括tzdata并配置时区
 RUN apt-get update && \
-    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    dpkg-reconfigure --frontend noninteractive tzdata && \
     apt-get install -y \
+    tzdata \
     ffmpeg \
     libsndfile1 \
     curl \
     git \
     python3.8 \
     python3.8-venv \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+    python3-pip && \
+    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
 # 从构建阶段复制虚拟环境
 COPY --from=builder /opt/venv /opt/venv
