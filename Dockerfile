@@ -4,9 +4,13 @@ FROM nvidia/cuda:12.9.0-devel-ubuntu20.04 as builder
 # 设置环境变量
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Shanghai
 
-# 安装系统依赖
-RUN apt-get update && apt-get install -y \
+# 安装系统依赖，预先配置时区
+RUN apt-get update && \
+    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    apt-get install -y \
     build-essential \
     git \
     wget \
@@ -49,8 +53,16 @@ RUN echo "# Models will be downloaded on first run" > /app/.model_cache_info
 # 运行阶段
 FROM nvidia/cuda:12.9.0-runtime-ubuntu20.04
 
-# 安装运行时依赖
-RUN apt-get update && apt-get install -y \
+# 设置环境变量
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Shanghai
+
+# 安装运行时依赖，预先配置时区
+RUN apt-get update && \
+    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    apt-get install -y \
     ffmpeg \
     libsndfile1 \
     curl \
