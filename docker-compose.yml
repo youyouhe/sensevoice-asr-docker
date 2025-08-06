@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # ASR服务主容器
+  asr-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # 可选：构建时指定CUDA版本
+        CUDA_VERSION: "12.1"
+    container_name: sensevoice-asr
+    ports:
+      - "5001:5001"
+    environment:
+      # NVIDIA GPU配置
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+      # 可选：如果需要在容器内使用特定GPU
+      # - CUDA_VISIBLE_DEVICES=0,1,2,3
+    volumes:
+      # 模型缓存持久化
+      - model_cache:/root/.cache/modelscope/hub
+      # 临时文件目录
+      - tmp_data:/app/tmp
+      # 可选：挂载本地音频文件目录
+      # - ./audio:/app/audio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - asr-network
+
+  # 可选：Nginx反向代理（如果需要更高级的路由）
+  nginx:
+    image: nginx:alpine
+    container_name: asr-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - asr-service
+    restart: unless-stopped
+    networks:
+      - asr-network
+    profiles:
+      - nginx
+
+  # 可选：Redis缓存（如果需要高并发）
+  redis:
+    image: redis:7-alpine
+    container_name: asr-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    networks:
+      - asr-network
+    profiles:
+      - redis
+
+volumes:
+  model_cache:
+    driver: local
+    name: sensevoice-model-cache
+  tmp_data:
+    driver: local
+    name: sensevoice-tmp-data
+  redis_data:
+    driver: local
+    name: sensevoice-redis-data
+
+networks:
+  asr-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
