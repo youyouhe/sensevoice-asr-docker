@@ -1,5 +1,5 @@
 # 多阶段构建 - GPU版本
-FROM nvidia/cuda:12.9.0-devel-ubuntu20.04 as builder
+FROM nvidia/cuda:12.4.1-devel-ubuntu20.04 as builder
 
 # 设置环境变量
 ENV DEBIAN_FRONTEND=noninteractive
@@ -33,7 +33,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip
 
 # 安装PyTorch with CUDA support
-RUN pip install torch==2.3.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+RUN pip install torch==2.3.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu124
 
 # 设置工作目录
 WORKDIR /app
@@ -52,7 +52,7 @@ COPY . .
 RUN echo "# Models will be downloaded on first run" > /app/.model_cache_info
 
 # 运行阶段
-FROM nvidia/cuda:12.9.0-runtime-ubuntu20.04
+FROM nvidia/cuda:12.4.1-runtime-ubuntu20.04
 
 # 设置环境变量
 ENV DEBIAN_FRONTEND=noninteractive
